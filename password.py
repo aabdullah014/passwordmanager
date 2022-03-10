@@ -5,8 +5,6 @@ cursorObj = con.cursor()
 
 cursorObj.execute("CREATE TABLE IF NOT EXISTS passwords (website text, username text, password text)")
 
-
-
 def insertLogin (website, username, password):
     login = (website, username, password)
     cursorObj.execute("INSERT INTO passwords(website, username, password) VALUES (?, ?, ?)", login)

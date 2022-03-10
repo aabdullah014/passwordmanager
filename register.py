@@ -18,7 +18,7 @@ for users in seed_users:
 connection.commit()
 connection.close()
 
-def post(username, password):
+def create_user(username, password):
     connection = sqlite3.connect('users.db')
     cur = connection.cursor()
 
