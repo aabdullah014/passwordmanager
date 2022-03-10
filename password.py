@@ -3,7 +3,10 @@ import sqlite3
 con = sqlite3.connect('passwordlist.db')
 cursorObj = con.cursor()
 
-cursorObj.execute("CREATE TABLE IF NOT EXISTS passwords (website text, username text, password text)")
+cursorObj.execute("CREATE TABLE IF NOT EXISTS passwords (website text, username text, password text, pass_id int)")
+
+cursorObj.execute("CREATE TABLE IF NOT EXISTS users (user_id INTEGER PRIMARY KEY, username text, password text)")
+
 
 def insertLogin (website, username, password):
     login = (website, username, password)

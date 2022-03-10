@@ -1,27 +1,18 @@
-from random import seed
 import sqlite3
 
-connection = sqlite3.connect('users.db')
-cur = connection.cursor()
-
-create_user_table = 'CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username text, password text)'
-cur.execute(create_user_table)
-
-seed_users =[
-    ['aabdullah014', 'King'],
-    ['asahmad8','dad']
-    ]
-
-for users in seed_users:
-    cur.execute("INSERT INTO users (username, password) VALUES (?, ?)", (users[0], users[1]))
-
-connection.commit()
-connection.close()
+connection = sqlite3.connect('passwordlist.db')
+cursor = connection.cursor()
 
 def create_user(username, password):
-    connection = sqlite3.connect('users.db')
-    cur = connection.cursor()
+    query = "INSERT INTO users (username, password) VALUES (?, ?)"
+    cursor.execute(query, (username, password))
+    connection.commit()
+    connection.close()
 
-    query = "INSERT INTO users VALUES (null, ?, ?)"
+def get_passwords(user_id):
+    query = "SELECT website, username, password FROM passwords WHERE pass_id = ?"
+    result = cursor.execute(query, (user_id,))
+    row = result.fetchall()
+    
 
-    cur.execute(query, (username, password))
+    return row

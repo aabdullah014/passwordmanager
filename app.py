@@ -2,6 +2,9 @@ from audioop import add
 from tkinter import *
 import sqlite3
 from venv import create
+from password import updateLogin, deleteLogin
+import user
+from register import create_user, get_passwords
 
 # create root window
 root = Tk()
@@ -22,32 +25,63 @@ pass_txt.grid(column = 1, row = 4)
 
 # function to display text when button clicked
 def clicked():
-    validateUser(user_txt.get(), pass_txt.get())
+    connection = sqlite3.connect('passwordlist.db')
+    cursor = connection.cursor()
+
+    query = "SELECT user_id FROM users WHERE username = ? AND password = ?"
+    username = user_txt.get()
+    password = user_txt.get()
+    result = cursor.execute(query,(username, password))
+    row = result.fetchone()
+    validateUser(row, username, password)
 
 def refresh(username):
-    loginSuccess(username)
+    connection = sqlite3.connect('passwordlist.db')
+    cursor = connection.cursor()
+
+    query = "SELECT user_id FROM users WHERE username = ? AND password = ?"
+    username = user_txt.get()
+    password = user_txt.get()
+    result = cursor.execute(query,(username, password))
+    user_id = result.fetchone()
+    loginSuccess(user_id, username)
 
 def create_credentials(website, username, password):
     root.withdraw()
     connection = sqlite3.connect('passwordlist.db')
     cursor = connection.cursor()
-    query = "INSERT INTO passwords VALUES (?, ?, ?)"
+    query = "INSERT INTO passwords (website, username, password) VALUES (?, ?, ?)"
     cursor.execute(query, (str(website), str(username), str(password)))
     connection.commit()
     connection.close()
+
+def register(username, password):
+    connection = sqlite3.connect('passwordlist.db')
+    cursor = connection.cursor()
+
+    query = "SELECT user_id FROM users WHERE username = ? AND password = ?"
+    username = user_txt.get()
+    password = user_txt.get()
+    result = cursor.execute(query,(username, password))
+    user_id = result.fetchone()
+    create_user(username, password)
+    loginSuccess(user_id, username)
 
 # create button
 btn = Button(root, text = "Login", fg = "black", command= clicked)
 btn.grid(column = 1, row = 5)
 
+# create button
+btn = Button(root, text = "Register", fg = "black", command= lambda: register(user_txt.get(), pass_txt.get()))
+btn.grid(column = 1, row = 6)
+
 # if login successful, list the website
-def loginSuccess(username):
+def loginSuccess(user_id, username):
     con = sqlite3.connect('passwordlist.db')
     cursorObj = con.cursor()
 
     root = Tk()
 
-    height = 10
     root.title("Password Manager")
     root.geometry('1280x720')
 
@@ -58,7 +92,7 @@ def loginSuccess(username):
     # btn_update = Button(root, text = "Update", fg = "blue", command = clicked)
     # btn_delete = Button(root, text = "Delete", fg = "blue", command = clicked)
     btn_refresh = Button(root, text = "Refresh", fg = "blue", command = lambda: refresh(username))
-    btn_create = Button(root, text = "Create", fg = "blue", command = create_screen)
+    btn_create = Button(root, text = "Create", fg = "blue", command = lambda: create_screen(username))
 
     # btn_update.grid(column = 0, row = 1)
     # btn_delete.grid(column = 1, row = 1)
@@ -66,8 +100,8 @@ def loginSuccess(username):
     btn_create.grid(column = 2, row = 1)
 
     
-    query = "SELECT * FROM passwords WHERE username = ?"
-    result = cursorObj.execute(query, (username,))
+    query = "SELECT * FROM passwords WHERE pass_id = ?"
+    result = cursorObj.execute(query, (user_id,))
     row = result.fetchall()
     for i in range(len(row)):
         web = Label(root, text = "Website: "+str(row[i][0]))
@@ -77,28 +111,36 @@ def loginSuccess(username):
         passw = Label(root, text = "Password: "+str(row[i][2]))
         passw.grid(row = i+5, column = 15)
     
-def validateUser(username, password):
+def validateUser(user_id, username, password):
     con = sqlite3.connect('passwordlist.db')
     cursor = con.cursor()
 
     query = "SELECT username, password FROM passwords"
     result = cursor.execute(query)
     row = result.fetchall()
+    print(row)
 
     login = (username, password)
-    print(row)
     if login in row:
         root.withdraw()
-        loginSuccess(username)
+        loginSuccess(user_id, username)
     else:
         label.configure(text = "Please try again", fg = "red")
 
 def add_entry(website, username, password):
+    connection = sqlite3.connect('passwordlist.db')
+    cursor = connection.cursor()
+
+    query = "SELECT user_id FROM users WHERE username = ? AND password = ?"
+    username = user_txt.get()
+    password = user_txt.get()
+    result = cursor.execute(query,(username, password))
+    user_id = result.fetchone()
     create_credentials(website, username, password)
 
-    loginSuccess(username)
+    loginSuccess(user_id, username)
 
-def create_screen():
+def create_screen(username):
     root = Tk()
     root.title("Password Manager")
     root.geometry('640x360')
@@ -109,10 +151,10 @@ def create_screen():
 
     # addition of entry field
     web_txt = Entry(root, width = 20)
-    user_txt = Entry(root, width = 20)
+    user_txt = Entry(root, width =20)
     pass_txt = Entry(root, width = 20)
-    web_txt.grid(column = 1, row = 2)
-    user_txt.grid(column = 1, row = 3)
+    web_txt.grid(column = 1, row = 3)
+    user_txt.grid(column = 1, row = 2)
     pass_txt.grid(column = 1, row = 4)
 
 
