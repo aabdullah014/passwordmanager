@@ -28,7 +28,7 @@ def refresh(username):
     loginSuccess(username)
 
 def create_credentials(website, username, password):
-    root.destroy()
+    root.withdraw()
     connection = sqlite3.connect('passwordlist.db')
     cursor = connection.cursor()
     query = "INSERT INTO passwords VALUES (?, ?, ?)"
@@ -66,8 +66,8 @@ def loginSuccess(username):
     btn_create.grid(column = 2, row = 1)
 
     
-    query = "SELECT * FROM passwords"
-    result = cursorObj.execute(query)
+    query = "SELECT * FROM passwords WHERE username = ?"
+    result = cursorObj.execute(query, (username,))
     row = result.fetchall()
     for i in range(len(row)):
         web = Label(root, text = "Website: "+str(row[i][0]))
@@ -78,8 +78,17 @@ def loginSuccess(username):
         passw.grid(row = i+5, column = 15)
     
 def validateUser(username, password):
-    if username == "" and password == "":
-        root.destroy()
+    con = sqlite3.connect('passwordlist.db')
+    cursor = con.cursor()
+
+    query = "SELECT username, password FROM passwords"
+    result = cursor.execute(query)
+    row = result.fetchall()
+
+    login = (username, password)
+    print(row)
+    if login in row:
+        root.withdraw()
         loginSuccess(username)
     else:
         label.configure(text = "Please try again", fg = "red")
