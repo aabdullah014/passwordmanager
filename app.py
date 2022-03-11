@@ -32,7 +32,7 @@ def clicked():
     username = user_txt.get()
     password = user_txt.get()
     result = cursor.execute(query,(username, password))
-    row = result.fetchone()
+    row = result.fetchone()[0]
     validateUser(row, username, password)
 
 def refresh(username):
@@ -42,8 +42,8 @@ def refresh(username):
     query = "SELECT user_id FROM users WHERE username = ? AND password = ?"
     username = user_txt.get()
     password = user_txt.get()
-    result = cursor.execute(query,(username, password))
-    user_id = result.fetchone()
+    result = cursor.execute(query,(str(username), str(password)))
+    user_id = result.fetchone()[0]
     loginSuccess(user_id, username)
 
 def create_credentials(website, username, password):
@@ -56,6 +56,7 @@ def create_credentials(website, username, password):
     connection.close()
 
 def register(username, password):
+    create_user(username, password)
     connection = sqlite3.connect('passwordlist.db')
     cursor = connection.cursor()
 
@@ -63,8 +64,11 @@ def register(username, password):
     username = user_txt.get()
     password = user_txt.get()
     result = cursor.execute(query,(username, password))
-    user_id = result.fetchone()
-    create_user(username, password)
+    user_id = result.fetchone()[0]
+
+    query = "SELECT * FROM users"
+    result = cursor.execute(query)
+
     loginSuccess(user_id, username)
 
 # create button
@@ -115,7 +119,7 @@ def validateUser(user_id, username, password):
     con = sqlite3.connect('passwordlist.db')
     cursor = con.cursor()
 
-    query = "SELECT username, password FROM passwords"
+    query = "SELECT username, password FROM users"
     result = cursor.execute(query)
     row = result.fetchall()
     print(row)
@@ -135,7 +139,7 @@ def add_entry(website, username, password):
     username = user_txt.get()
     password = user_txt.get()
     result = cursor.execute(query,(username, password))
-    user_id = result.fetchone()
+    user_id = result.fetchone()[0]
     create_credentials(website, username, password)
 
     loginSuccess(user_id, username)

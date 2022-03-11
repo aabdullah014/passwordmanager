@@ -12,6 +12,7 @@ def insertLogin (website, username, password):
     login = (website, username, password)
     cursorObj.execute("INSERT INTO passwords(website, username, password) VALUES (?, ?, ?)", login)
     con.commit()
+    con.close()
 
 def getLogin (website):
     cursorObj.execute("SELECT username, password FROM passwords WHERE website = ?", (website,))
